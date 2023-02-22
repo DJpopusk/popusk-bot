@@ -46,7 +46,8 @@ class YLBotClient(discord.Client):
             f"{message.channel} :: {message.author} :: {message.content}"
             f" :: {message.type} :: {message.components} :: {message.attachments[0] if message.attachments else None}")
         if message.content:
-            dba.add_message(message.content, message.author, message.channel, message.created_at)
+            dba.add_message(message.content, message.author, message.channel, message.created_at, message.jump_url)
+            print(message.jump_url)
 
 
 intents = discord.Intents.all()

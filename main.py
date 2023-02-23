@@ -2,7 +2,7 @@ import discord
 from TOKEN import TOKEN
 import logging
 import sqlite3
-import data_base_api as dba
+import dbapi
 
 logger = logging.getLogger('discord')
 logger.setLevel(logging.DEBUG)
@@ -44,10 +44,11 @@ class YLBotClient(discord.Client):
 
         logger.info(
             f"{message.channel} :: {message.author} :: {message.content}"
-            f" :: {message.type} :: {message.components} :: {message.attachments[0] if message.attachments else None}")
-        if message.content:
-            dba.add_message(message.content, message.author, message.channel, message.created_at, message.jump_url)
+            f" :: {message.type} :: {message.components} :: {message.attachments[0] if message.attachments else None}"
+            f" :: {message.embeds[0] if message.embeds else None}  :: {message.created_at}")
+        if message.content or message.attachments:
             print(message.jump_url)
+            dbapi.add_message(message)
 
 
 intents = discord.Intents.all()

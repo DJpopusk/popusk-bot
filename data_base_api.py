@@ -9,7 +9,7 @@ def add_message(message_data, author, channel=None, time=None, url=None):
     ::param date: date of message
     ::param time: time of message
     ::param url: url of message"""
-
+    print(message_data, author, channel, time, url)
     con = sqlite3.connect("allDATA.db")
     cur = con.cursor()
     data = url_decode(url)
@@ -18,8 +18,7 @@ def add_message(message_data, author, channel=None, time=None, url=None):
     print(data)
     if data["server"] == "@me":
         if_dm = True
-    cur.execute(
-        f"""INSERT INTO message (if_dm, user_id, server_id, channel, message_id)
+    cur.execute(f"""INSERT INTO message (if_dm, user_id, server_id, channel, message_id)
          VALUES ({if_dm}, '{author}', {data['server']}, {data['channel']}, {data['message']})""")
     # cur.execute("""INSERT INTO message_data (data_type, text, time, date, message_id)""")
 
@@ -61,6 +60,3 @@ def add_message_data(m_id, data, date, time):
     cur.execute("""INSERT INTO message_data (data_type, text, time, date, message_id)
     VALUES (?, ?,?,?,?,?)""", (data[0], data[1], time, date, m_id))
     con.commit()
-
-# add_message("123", "noone", "123", time=None,
-#             url="https://discord.com/channels/980187814006247474/980187814547300447/1077186669297549363")

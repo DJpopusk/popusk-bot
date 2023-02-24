@@ -137,6 +137,10 @@ class Board:
             return
         self.place(cell, column, t)
 
+    def filled_check(self):
+        a = [self.find_empty(i) for i in range(self.columns)]
+        return set(a) == {-1}
+
 
 class Game(Board):
     def __init__(self, rows=6, columns=7, filler=":blue_square:",
@@ -155,14 +159,34 @@ Popusk 2 : {self.player2}
 {self.board_view()}"""
 
     def on_win(self, t):
-        return f"""Connect4 by Popusk-bot
-
+        if t != "tt":
+            return f"""Connect4 by Popusk-bot
+    
 Popusk 1 : {self.player1}
 Popusk 2 : {self.player2}
 {self.players[t]} ! WON !
+{self.board_view()}"""
+        else:
+            return f"""Connect4 by Popusk-bot
+Popusk 1 : {self.player1}
+Popusk 2 : {self.player2}
+!DRAW!
+the field is full
 {self.board_view()}"""
 
     def move(self, column, t):
         super().move(column, t)
         if self.win(t):
             self.on_win(t)
+
+    def game_over(self):
+        if self.t1win() or self.t2win() or self.filled_check():
+            return True
+
+    def on_game_over(self):
+        if self.t1win():
+            self.on_win("t1")
+        elif self.t2win():
+            self.on_win("t2")
+        else:
+            self.on_win("tt")

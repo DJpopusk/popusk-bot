@@ -40,7 +40,7 @@ class YLBotClient(discord.Client):
         logger.info(
             f"{message.channel} :: {message.author} :: {message.content}"
             f" :: {message.type} :: {message.components} :: {' ;; '.join(message.attachments) if message.attachments else None}"
-            f" :: {' ;; '.join(message.embeds) message.embeds else None}  :: {message.created_at}")
+            f" :: {' ;; '.join(message.embeds) if message.embeds else None}  :: {message.created_at}")
         if message.content or message.attachments:
             print(message.jump_url)
             dbapi.add_message(message)

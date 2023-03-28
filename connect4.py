@@ -77,7 +77,7 @@ class Board:
         digs = get_matrix_diagonal(self.table)
         digs = [i for i in digs if i.count(t) >= 4]
         for i in digs:
-            if len(i) == 4 and i == [t, t, t, t]:
+            if i == [t, t, t, t]:
                 return True
 
         return False
@@ -102,13 +102,11 @@ class Board:
         mas = get_matrix_diagonal(self.table)
         mas = [i for i in mas if len(i) >= 4]
         for i in mas:
-            match len(i):
-                case 4:
-                    if i == [a, a, a, a]:
-                        return True
-                case _:
-                    if contains(i, [a, a, a, a]):
-                        return True
+            if i == [a, a, a, a]:
+                return True
+            else:
+                if contains(i, [a, a, a, a]):
+                    return True
         return False
 
     def win(self, t='t1'):

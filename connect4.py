@@ -36,7 +36,7 @@ class Board:
         res = ["".join([self.view[t] for t in row]) for row in self.table]
         return "\n".join(res)
 
-    def if_empty(self, row, column):
+    def is_empty(self, row, column):
         return self.table[row][column] == "_"
 
     def row_check(self, t='t1'):
@@ -47,10 +47,7 @@ class Board:
                                                                                                 t, t]:
                 return True
             elif a1 >= 4:
-                b = self.table[_].index(t)
-                c = self.table[_][b + 1:].index(t)
-                b = b + c
-
+                b = self.table[_].index(t) + self.table[_][b + 1:].index(t)
                 if self.table[_][b: min(b + 4, len(self.table[_]))] == [t, t, t, t]:
                     return True
         return False
@@ -110,7 +107,7 @@ class Board:
         return False
 
     def win(self, t='t1'):
-        return self.win_row(t) or self.win_column(t) or self.diagonal_win()
+        return self.win_row(t) or self.win_column(t) or self.diagonal_win(t)
 
     def t1win(self):
         return self.win('t1')
@@ -121,7 +118,7 @@ class Board:
     def find_empty(self, column):
         a = rotate_matrix(self.table)
         for i in list(range(self.rows))[::-1]:
-            if self.if_empty(i, column):
+            if self.is_empty(i, column):
                 return i
         else:
             return -1

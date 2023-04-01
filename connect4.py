@@ -33,8 +33,8 @@ class Board:
     def __init__(self, rows=6, columns=7, filler=":blue_square:", team1=":orange_circle:", team2=":green_circle:"):
         self.table = [["_" for i in range(columns)] for _ in range(rows)]
         self.view = {"t1": team1, "t2": team2, "_": filler}
-        self.rows = 6
-        self.columns = 7
+        self.rows = rows
+        self.columns = columns
 
     def board_view(self):
         res = ["".join([self.view[t] for t in row]) for row in self.table]
@@ -60,15 +60,14 @@ class Board:
         mas = rotate_matrix(self.table)
         for _ in range(len(mas)):
             a1 = mas[_].count(t)
-            if a1 >= 4 and mas[_][mas[_].index(t):mas[_].index(t) + 4] == [t, t,
-                                                                           t, t]:
+            if a1 >= 4 and mas[_][mas[_].index(t):mas[_].index(t) + 4] == q([t]):
                 return True
             elif a1 >= 4:
                 b = mas[_].index(t)
                 c = mas[_][b + 1:].index(t)
                 b = b + c
 
-                if mas[_][b: min(b + 4, len(mas[_]))] == [t, t, t, t]:
+                if mas[_][b: min(b + 4, len(mas[_]))] == q([t]):
                     return True
         return False
 
@@ -77,7 +76,7 @@ class Board:
         digs = get_matrix_diagonal(self.table)
         digs = [i for i in digs if i.count(t) >= 4]
         for i in digs:
-            if i == q([t]):
+            if q([t]) in i:
                 return True
 
         return False

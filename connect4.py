@@ -25,6 +25,10 @@ def contains(small, big):
     return False
 
 
+def q(x):
+    return x * 4
+
+
 class Board:
     def __init__(self, rows=6, columns=7, filler=":blue_square:", team1=":orange_circle:", team2=":green_circle:"):
         self.table = [["_" for i in range(columns)] for _ in range(rows)]
@@ -43,12 +47,11 @@ class Board:
         t = self.view[t]
         for _ in range(len(self.table)):
             a1 = self.table[_].count(t)
-            if a1 >= 4 and self.table[_][self.table[_].index(t):self.table[_].index(t) + 4] == [t, t,
-                                                                                                t, t]:
+            if a1 >= 4 and self.table[_][self.table[_].index(t):self.table[_].index(t) + 4] == q([t]):
                 return True
             elif a1 >= 4:
                 b = self.table[_].index(t) + self.table[_][b + 1:].index(t)
-                if self.table[_][b: min(b + 4, len(self.table[_]))] == [t, t, t, t]:
+                if self.table[_][b: min(b + 4, len(self.table[_]))] == q([t]):
                     return True
         return False
 
@@ -74,7 +77,7 @@ class Board:
         digs = get_matrix_diagonal(self.table)
         digs = [i for i in digs if i.count(t) >= 4]
         for i in digs:
-            if i == [t, t, t, t]:
+            if i == q([t]):
                 return True
 
         return False
@@ -82,7 +85,7 @@ class Board:
     def win_row(self, t='t1'):
         a = self.view[t]
         for i in self.table:
-            if contains([a, a, a, a], i):
+            if contains(q([a]), i):
                 return True
         return False
 
@@ -90,7 +93,7 @@ class Board:
         mas = rotate_matrix(self.table)
         a = self.view[t]
         for i in mas:
-            if contains([a, a, a, a], i):
+            if contains(q([a]), i):
                 return True
         return False
 
@@ -99,10 +102,10 @@ class Board:
         mas = get_matrix_diagonal(self.table)
         mas = [i for i in mas if len(i) >= 4]
         for i in mas:
-            if i == [a, a, a, a]:
+            if i == q([a]):
                 return True
             else:
-                if contains(i, [a, a, a, a]):
+                if contains(i, q([a])):
                     return True
         return False
 

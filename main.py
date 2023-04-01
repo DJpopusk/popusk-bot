@@ -54,7 +54,7 @@ class YLBotClient(discord.Client):
             await message.author.dm_channel.send(
                 f'Хорошо, начнём'
             )
-            self.game = Game()
+            self.game = connect4.Game()
             await message.author.dm_channel.send(
                 f'выбираем колонну для заполнения'
             )

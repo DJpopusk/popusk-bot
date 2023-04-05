@@ -25,33 +25,33 @@ def contains(small, big):
     return False
 
 
+def q(x):
+    return x * 4
+
+
 class Board:
     def __init__(self, rows=6, columns=7, filler=":blue_square:", team1=":orange_circle:", team2=":green_circle:"):
         self.table = [["_" for i in range(columns)] for _ in range(rows)]
         self.view = {"t1": team1, "t2": team2, "_": filler}
-        self.rows = 6
-        self.columns = 7
+        self.rows = rows
+        self.columns = columns
 
     def board_view(self):
         res = ["".join([self.view[t] for t in row]) for row in self.table]
         return "\n".join(res)
 
-    def if_empty(self, row, column):
+    def is_empty(self, row, column):
         return self.table[row][column] == "_"
 
     def row_check(self, t='t1'):
         t = self.view[t]
         for _ in range(len(self.table)):
             a1 = self.table[_].count(t)
-            if a1 >= 4 and self.table[_][self.table[_].index(t):self.table[_].index(t) + 4] == [t, t,
-                                                                                                t, t]:
+            if a1 >= 4 and self.table[_][self.table[_].index(t):self.table[_].index(t) + 4] == q([t]):
                 return True
             elif a1 >= 4:
-                b = self.table[_].index(t)
-                c = self.table[_][b + 1:].index(t)
-                b = b + c
-
-                if self.table[_][b: min(b + 4, len(self.table[_]))] == [t, t, t, t]:
+                b = self.table[_].index(t) + self.table[_][b + 1:].index(t)
+                if self.table[_][b: min(b + 4, len(self.table[_]))] == q([t]):
                     return True
         return False
 
@@ -60,15 +60,14 @@ class Board:
         mas = rotate_matrix(self.table)
         for _ in range(len(mas)):
             a1 = mas[_].count(t)
-            if a1 >= 4 and mas[_][mas[_].index(t):mas[_].index(t) + 4] == [t, t,
-                                                                           t, t]:
+            if a1 >= 4 and mas[_][mas[_].index(t):mas[_].index(t) + 4] == q([t]):
                 return True
             elif a1 >= 4:
                 b = mas[_].index(t)
                 c = mas[_][b + 1:].index(t)
                 b = b + c
 
-                if mas[_][b: min(b + 4, len(mas[_]))] == [t, t, t, t]:
+                if mas[_][b: min(b + 4, len(mas[_]))] == q([t]):
                     return True
         return False
 
@@ -77,7 +76,7 @@ class Board:
         digs = get_matrix_diagonal(self.table)
         digs = [i for i in digs if i.count(t) >= 4]
         for i in digs:
-            if len(i) == 4 and i == [t, t, t, t]:
+            if q([t]) in i:
                 return True
 
         return False
@@ -85,7 +84,7 @@ class Board:
     def win_row(self, t='t1'):
         a = self.view[t]
         for i in self.table:
-            if contains([a, a, a, a], i):
+            if contains(q([a]), i):
                 return True
         return False
 
@@ -93,7 +92,7 @@ class Board:
         mas = rotate_matrix(self.table)
         a = self.view[t]
         for i in mas:
-            if contains([a, a, a, a], i):
+            if contains(q([a]), i):
                 return True
         return False
 
@@ -102,17 +101,15 @@ class Board:
         mas = get_matrix_diagonal(self.table)
         mas = [i for i in mas if len(i) >= 4]
         for i in mas:
-            match len(i):
-                case 4:
-                    if i == [a, a, a, a]:
-                        return True
-                case _:
-                    if contains(i, [a, a, a, a]):
-                        return True
+            if i == q([a]):
+                return True
+            else:
+                if contains(i, q([a])):
+                    return True
         return False
 
     def win(self, t='t1'):
-        return self.win_row(t) or self.win_column(t) or self.diagonal_win()
+        return self.win_row(t) or self.win_column(t) or self.diagonal_win(t)
 
     def t1win(self):
         return self.win('t1')
@@ -123,7 +120,7 @@ class Board:
     def find_empty(self, column):
         a = rotate_matrix(self.table)
         for i in list(range(self.rows))[::-1]:
-            if self.if_empty(i, column):
+            if self.is_empty(i, column):
                 return i
         else:
             return -1

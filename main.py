@@ -21,7 +21,7 @@ con.commit()
 
 class YLBotClient(discord.Client):
     def __init__(self, intents):
-        super().__init__(intends)
+        super().__init__(intents=intents)
         is_game = False
         game = None
         p1id = None
@@ -102,5 +102,5 @@ class YLBotClient(discord.Client):
 
 intents = discord.Intents.all()
 intents.members = True
-client = YLBotClient(intents=intents)
+client = YLBotClient(intents)
 client.run(TOKEN)

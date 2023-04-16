@@ -37,6 +37,7 @@ class Board:
         self.columns = columns
 
     def board_view(self):
+        print([[t for row in self.table for t in row]])
         res = ["".join([self.view[t] for t in row]) for row in self.table]
         return "\n".join(res)
 
@@ -126,7 +127,7 @@ class Board:
             return -1
 
     def place(self, row, column, t):
-        self.table[row][column] = self.view[t]
+        self.table[row][column] = t
 
     def move(self, column, t):
         cell = self.find_empty(column)

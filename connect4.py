@@ -30,11 +30,12 @@ def q(x):
 
 
 class Board:
-    def __init__(self, rows=6, columns=7, filler=":blue_square:", team1=":orange_circle:", team2=":green_circle:"):
+    def __init__(self, rows=6, columns=6, filler=":blue_square:", team1=":orange_circle:", team2=":green_circle:"):
         self.table = [["_" for i in range(columns)] for _ in range(rows)]
         self.view = {"t1": team1, "t2": team2, "_": filler}
         self.rows = rows
         self.columns = columns
+        self.turn = "t1"
 
     def board_view(self):
         print([[t for row in self.table for t in row]])
@@ -134,10 +135,17 @@ class Board:
         if cell == -1:
             return
         self.place(cell, column, t)
+        self.switch_turn()
 
     def filled_check(self):
         a = [self.find_empty(i) for i in range(self.columns)]
         return set(a) == {-1}
+
+    def switch_turn(self):
+        if self.turn == "t1":
+            self.turn = "t2"
+        else:
+            self.turn = "t1"
 
 
 class Game(Board):
@@ -174,6 +182,7 @@ the field is full
 
     def move(self, column, t):
         super().move(column, t)
+
         if self.win(t):
             self.on_win(t)
 
@@ -188,3 +197,13 @@ the field is full
             self.on_win("t2")
         else:
             self.on_win("tt")
+
+    def force_win(self, t="t1"):
+        self.on_win(t)
+
+    def edit_players(self, p1=None, p2=None):
+        if p1:
+            self.player1 = p1
+        if p2:
+            self.player2 = p2
+        self.players = {"t1": self.player1, "t2": self.player2}

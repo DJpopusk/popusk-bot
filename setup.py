@@ -16,7 +16,7 @@ def setup():
     time  TIME,
     date  DATE,
     attachment STRING
-);
+ );
 
     """)
     cur.execute("""CREATE TABLE channels (

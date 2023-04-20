@@ -1,1 +1,3 @@
-TOKEN = "MTA5NjcxMDc1MzQxMjcxMDUxMg.GWwHXH.pVKqv-eo6d4YxhQaYbc5B8_mW7Ts3vPKMA4jBI"
+TOKEN = "MTA2OTUyMjI3NjIyOTMyODk3Ng.GsZrmE.2fvEdbsglO7jiA8eF7AYH81E-FsjpWnafgM8WM"
+
+# на гитхабе залит не настоящий токен

@@ -5,7 +5,9 @@ import datetime
 def url_decode(url):
     if not url:
         return dict()
-    values = url.replace("//", "/").split("/")[3:]
+    ur1 = url.replace("//", "/")
+    ur1 = url.split("/")
+    values = ur1[3:]
     keys = ["type", "server", "channel", "message"]
     return dict(zip(keys, values))
 

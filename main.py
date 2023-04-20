@@ -3,7 +3,9 @@ from TOKEN import TOKEN
 import logging
 import sqlite3
 import dbapi
-import connect4
+from discord import app_commands
+from discord.ext import commands
+from connect4 import Game
 
 logger = logging.getLogger('discord')
 logger.setLevel(logging.DEBUG)
@@ -15,96 +17,70 @@ con = sqlite3.connect("allDATA.db")
 cur = con.cursor()
 con.commit()
 
-
 # client = discord.Client()
+
+EMOTES = {'1️⃣': 0, '2️⃣': 1, '3️⃣': 2, '4️⃣': 3, '5️⃣': 4, '6️⃣': 5, '7️⃣': 6,
+          '🏳': 'F'}
+
+
+def game_start_message(message):
+    if message.mentions:
+        pass
 
 
 class YLBotClient(discord.Client):
     def __init__(self, intents):
         super().__init__(intents=intents)
-        self.is_game = False
-        self.game = None
-        self.p1id = None
-        self.p2id = None
-        self.ordr = None
+        self.game = Game()
+        self.playing = False
+        self.game_message = None
 
     async def on_ready(self):
         logger.info(f'{self.user} has connected to Discord!')
         for guild in self.guilds:
             logger.info(
                 f'{self.user} подключились к чату:\n'
-                f'{guild.name}: (id: {guild.id})')
+                f'{guild.name}(id: {guild.id})')
 
-        async def on_member_join(self, member):
-            await member.create_dm()
-            await member.channel.send(
-                f'Здравствуйте, {member.name}, хотите поиграть в Соедини 4?'
-            )
+    async def on_member_join(self, member):
+        await member.create_dm()
+        await member.dm_channel.send(
+            f'Привет, {member.name}!'
+        )
 
     async def on_message(self, message):
+        if message.content and message.content[:6] == "!!play":
+            if message.mentions and message.mentions[0]:
+                self.game.edit_players(message.author, message.mentions[0])
+                self.playing = True
+                self.game_message = await message.channel.send(self.game.draw())
+
+                for i in EMOTES:
+                    await self.game_message.add_reaction(i)
         if message.author == self.user:
             return
-
         logger.info(
             f"{message.channel} :: {message.author} :: {message.content}"
-            f" :: {message.type} :: {message.components} :: {' ;; '.join(message.attachments) if message.attachments else None}"
-            f" :: {' ;; '.join(message.embeds) if message.embeds else None}  :: {message.created_at} :: self.is_game :: {self.is_game}")
-        if 'да' in message.content.lower() and not self.is_game:
-            self.is_game = True
-            await message.channel.send(
-                f'Хорошо, начнём'
-            )
-            self.game = connect4.Game()
-            await message.channel.send(
-                f'выбираем колонну для заполнения'
-            )
-            self.game.p1 = self.p1id = message.author
-            self.ordr = 1
-        elif self.is_game:
-            print(self.ordr)
-            if self.ordr == 1:
-                if message.author == self.p1id:
-                    try:
-                        c = int(message.content)
-                        self.game.move(c - 1, 't1')
-                        await message.channel.send(self.game.draw())
-                        if self.game.win():
-                            self.p1id = None
-                            self.p2id = None
-                            self.game = None
-                            self.is_game = None
-                    except TypeError:
-                        await message.channel.send(f'Только целые числа')
-                        return
-                else:
-                    await message.channel.send(f'ходить за других нельзя')
-                    return
-                self.ordr = 2
-            elif self.ordr == 2:
-                if self.p2id is None and message.author != self.p1id:
-                    self.game.p2 = self.p2id = message.author
-                elif message.author == self.p1id:
-                    await message.channel.send(f'ходить за других нельзя')
-                if message.author == self.p2id:
-                    try:
-                        c = int(message.content)
-                        self.game.move(c - 1, 't2')
-                        await message.channel.send(self.game.draw())
-                        if self.game.win():
-                            self.p1id = None
-                            self.p2id = None
-                            self.game = None
-                            self.is_game = None
-                    except ValueError:
-                        await message.channel.send(f'Только целые числа')
-                        return
-                else:
-                    await message.channel.send(f'ходить за других нельзя')
-                    return
-                self.ordr = 1
-                    
+            f" :: {message.type} :: {message.components} :: {message.attachments[0] if message.attachments else None}"
+            f" :: {message.embeds[0] if message.embeds else None}  :: {message.created_at}")
+        if message.content or message.attachments and message.author != 'P0pusk-bot#2673':
+            dbapi.add_message(message)
+
+    async def on_reaction_add(self, reaction, user):
+        if self.game_message and reaction.message.jump_url == self.game_message.jump_url:
+            if user in self.game.players.values():
+                if self.game.players[self.game.turn] == user:
+                    if EMOTES[reaction.emoji] == "F":
+                        self.game.switch_turn()
+                        self.game.force_win(self.game.turn)
+                        await self.game_message.edit(content=self.game.on_win(self.game.turn))
+                    else:
+                        self.game.move(EMOTES[reaction.emoji], self.game.turn)
+                        await self.game_message.edit(content=self.game.draw())
+
 
 intents = discord.Intents.all()
 intents.members = True
 client = YLBotClient(intents)
+tree = app_commands.CommandTree(client)
 client.run(TOKEN)

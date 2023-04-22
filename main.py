@@ -73,17 +73,32 @@ class YLBotClient(discord.Client):
         elif isinstance(self.game, connect4.Game):
             if self.ordr == 1:
                 if message.author == self.p1id:
+                    if 'сдаюсь' in message.content:
+                        await message.channel.send(self.game.on_win('draw'))
+                        self.p1id = None
+                        self.p2id = None
+                        self.game = None
+                        self.ordr = None
+                        return
                     try:
                         c = int(message.content)
                         self.game.move(c - 1, 't1')
-                        await message.channel.send(self.game.draw())
                         if self.game.win('t1'):
-                            print('amogus')
                             await message.channel.send(self.game.on_win('t1'))
                             self.p1id = None
                             self.p2id = None
                             self.game = None
                             self.ordr = None
+                            return
+                        elif self.game.view['_'] not in self.game.board_view():
+                            await message.channel.send(self.game.on_win('draw'))
+                            self.p1id = None
+                            self.p2id = None
+                            self.game = None
+                            self.ordr = None
+                            return
+                        else:
+                            await message.channel.send(self.game.draw())
                     except TypeError:
                         await message.channel.send(f'Только целые числа')
                         return
@@ -92,22 +107,37 @@ class YLBotClient(discord.Client):
                     return
                 self.ordr = 2
             elif self.ordr == 2:
-                if self.p2id is None and message.author != self.p1id:
+                if self.p2id is None and message.author == self.p1id:
                     self.game.p2 = self.p2id = message.author
                 elif message.author == self.p1id:
                     await message.channel.send(f'ходить за других нельзя')
                 if message.author == self.p2id:
+                    if 'сдаюсь' in message.content:
+                        await message.channel.send(self.game.on_win('draw'))
+                        self.p1id = None
+                        self.p2id = None
+                        self.game = None
+                        self.ordr = None
+                        return
                     try:
                         c = int(message.content)
                         self.game.move(c - 1, 't2')
-                        await message.channel.send(self.game.draw())
                         if self.game.win('t2'):
-                            print('amogus')
                             await message.channel.send(self.game.on_win('t2'))
                             self.p1id = None
                             self.p2id = None
                             self.game = None
                             self.ordr = None
+                            return
+                        elif self.game.view['_'] not in self.game.board_view():
+                            await message.channel.send(self.game.on_win('draw'))
+                            self.p1id = None
+                            self.p2id = None
+                            self.game = None
+                            self.ordr = None
+                            return
+                        else:
+                            await message.channel.send(self.game.draw())
                     except TypeError:
                         await message.channel.send(f'Только целые числа')
                         return
@@ -118,6 +148,13 @@ class YLBotClient(discord.Client):
         elif isinstance(self.game, checkers.checkers_Board):
             if self.ordr == 1:
                 if message.author == self.p1id:
+                    if 'сдаюсь' in message.content:
+                        await message.channel.send('объявляем ничью')
+                        self.p1id = None
+                        self.p2id = None
+                        self.game = None
+                        self.ordr = None
+                        return
                     try:
                         c = list(map(int, message.content.split(',')))
                         a = self.game.move(*c)
@@ -129,10 +166,12 @@ class YLBotClient(discord.Client):
                             self.p2id = None
                             self.game = None
                             self.ordr = None
-                        elif a in ['захват шашки прошёл успешно', 'движение выполнено'] and not self.game.is_leap:
+                            return
+                        elif a in ['взятие шашки прошло успешно', 'движение выполнено'] and not self.game.is_leap:
                             self.ordr = 2
                             self.game.p = 2
                             await message.channel.send(f'движение переходит к {self.ordr}')
+                            return
                     except OSError:
                         await message.channel.send(f'Надо 4 целых числа через запятую, меньших {self.game.s}, начиная с 0 в формате x1, y1, x2, y2.')
                         return
@@ -146,6 +185,13 @@ class YLBotClient(discord.Client):
                 elif message.author == self.p1id:
                     await message.channel.send(f'ходить за других нельзя')
                 if message.author == self.p2id:
+                    if 'сдаюсь' in message.content:
+                        await message.channel.send('объявляем ничью')
+                        self.p1id = None
+                        self.p2id = None
+                        self.game = None
+                        self.ordr = None
+                        return
                     try:
                         c = list(map(int, message.content.split(',')))
                         a = self.game.move(*c)
@@ -157,10 +203,12 @@ class YLBotClient(discord.Client):
                             self.p2id = None
                             self.game = None
                             self.ordr = None
-                        elif a in ['захват шашки прошёл успешно', 'движение выполнено']:
+                            return
+                        elif a in ['взятие шашки прошло успешно', 'движение выполнено']:
                             self.ordr = 1
                             self.game.p = 1
                             await message.channel.send(f'движение переходит к {self.ordr}')
+                            return
                     except TypeError:
                         await message.channel.send(f'Надо 4 целых числа через запятую, меньших {self.game.s}, начиная с 0 в формате x1, y1, x2, y2.')
                         return

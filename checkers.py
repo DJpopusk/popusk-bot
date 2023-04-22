@@ -1,19 +1,25 @@
 import sys
+from math import copysign
+import numpy as np
+
+
+a = np.array([[1, 2, 3], [4, 5, 6], [7, 8, 9]])
+a.diagonal
 
 
 nums = {0: ':zero:', 1: ':one:', 2: ':two:', 3: ':three:', 4: ':four:', 5: ':five:', 6: ':six:', 7: ':seven:', 8: ':eight:', 9: ':nine:'}
 
 
-def within(num, x, y):
-    return 0 <= x < num and 0 <= y < num
+def within(num, *ns):
+    return all(list(map(lambda n: 0 <= n < num, ns)))
 
 
 class checkers_Board:
-    def __init__(self, size=10, ir=2, v=':black_large_square:', f=':white_circle:', t1=':blue_circle:', t2=':green_circle:', t1k=':blue_square:', t2k=':green_square:'):
+    def __init__(self, size=10, ir=0, v=':black_large_square:', f=':white_circle:', t1=':blue_circle:', t2=':green_circle:', t1k=':blue_square:', t2k=':green_square:'):
         self.nem = {1: 2, 2: 1}
         self.tot = {1: (t1, t1k), 2: (t2, t2k)}
         self.d = {1: 1, 2: -1}
-        self.promr = {1: 9, 2: 0}
+        self.promr = {1: size - 1, 2: 0}
         self.kings = {1: t1k, 2: t2k}
         self.tkings = {t1: t1k, t2: t2k}
         self.pawns = {t1k: t1, t2k: t2}
@@ -25,9 +31,10 @@ class checkers_Board:
             c = t1 if i < ir else t2 if i > size - ir - 1 else f
             for j in range(size):
                 self.board[-1].append(v if (i + j) % 2 else c)
-        # self.board[1][1] = t1
-        # self.board[2][2] = t2
-        # self.board[4][4] = t2
+        self.board[0][0] = t1k
+        self.board[2][2] = t2
+        self.board[4][4] = t2
+        self.board[5][5] = t2
 
 
     def __repr__(self):
@@ -41,7 +48,7 @@ class checkers_Board:
         return ''.join(''.join(i) for i in self.board)
 
     def __set__(self):
-        return set([''.join(''.join(i) for i in self.board)])
+        return set([self._repr()])
 
     def __getitem__(self, key):
         if isinstance(key, int):
@@ -51,52 +58,65 @@ class checkers_Board:
     def __setitem__(self, key, v):
         self.board[key[1]][key[0]] = v
 
+    def has_enemy(self, nx, ny, dx, dy):
+        while within(self.s, nx + dx, ny + dy):
+            nx += dx
+            ny += dy
+            print(self[nx, ny])
+            if self[nx, ny] in self.tot[self.nem[self.p]]:
+                if (self[nx + dx, ny + dy] == self.f) if within(self.s, nx + dx, ny + dy) else False:
+                    return 1
+                return 0
+            elif self[nx, ny] in self.tot[self.p]:
+                return 0
+        return 0       
+
+
     def move(self, sx, sy, ex, ey):
         if not all(list(map(lambda x: 0 <= x < self.s, [sx, sy, ex, ey]))):
             return f'координаты не могут быть меньше 0 или выше {self.s}'
         st, et = self[sx, sy], self[ex, ey]
+        if not (sx + sy != ex + ey or sx - sy != ex - ey):
+            return 'нужно, чтобы клетки имели общие диагонали'
         if st not in self.tot[self.p]:
             return 'На месте начальной координаты нет вашего юнита'
         if et in self.tot[self.p]:
             print(et, self.tot[self.p], et in self.tot[self.p])
             return 'вы не можете направить туда ваш юнит'
-        if abs(sx - ex) != 1 and abs(sx - ex) != 1:
-            return 'клетки не рядом'
-        if ey - sy != self.d[self.p] and st.isnumeric():
-            return 'клетки не рядом'
-        if et in self.tot[self.nem[self.p]]:
-            if not (0 < 2 * ex - sx < self.s and 0 < 2 * ey - sy < self.s):
-                return f'координаты не могут быть меньше 0 или выше {self.s} ()'
-            if self[2 * ex - sx, 2 * ey - sy] != self.f:
-                return 'нельзя перепрыгивать на другие фигуры'
-            self[sx, sy] = self.f
-            self[ex, ey] = self.f
-            self[2 * ex - sx, 2 * ey - sy] = st
-            if 2 * ey - sy == self.promr[self.p]:
-                self[2 * ex - sx, 2 * ey - sy] = self.kings[self.p]
-            print(self)
-            self.is_leap = True
-            n1, n2, n3, n4, n5, n6 = [
-                self[ex, ey + 2 * self.d[self.p]] if within(self.s, ex, ey + 2 * self.d[self.p]) else None,
-                self[sx, ey + 3 * self.d[self.p]] if within(self.s, sx, ey + 3 * self.d[self.p]) else None,
-                self[3 * ex - 2 * sx, ey + 2 * self.d[self.p]] if within(self.s, 3 * ex - 2 * sx, ey + 2 * self.d[self.p]) else None,
-                self[4 * ex - 3 * sx, ey + 3 * self.d[self.p]] if within(self.s, 4 * ex - 3 * sx, ey + 3 * self.d[self.p]) else None,
-                self[3 * ex - 2 * sx, ey] if within(self.s, 3 * ex - 2 * sx, ey) and self[ex, ey] in self.kings.values() else None,
-                self[4 * ex - 3 * sx, sy] if within(self.s, 4 * ex - 3 * sx, sy) and self[ex, ey] in self.kings.values() else None,
-            ]
-            a = list(map(lambda x: x[0] in self.tot[self.nem[self.p]] and x[1] == self.f, [[n1, n2], [n3, n4], [n5, n6]]))
-            if not any(a):
-                self.is_leap = False
-            return 'захват шашки прошёл успешно'
-        elif not self.is_leap:
-            self[sx, sy] = self.f
-            self[ex, ey] = st
-            if ey == self.promr[self.p]:
-                self[ex, ey] = self.kings[self.p]
-            print(self)
-            return 'движение выполнено'
-        else:
+        st = self.board[sy][sx]
+        dx, dy = int(copysign(1, ex - sx)), int(copysign(1, ey - sy))
+        if abs(sx - ex) > 3 and self.board[sy][sx] in self.tkings:
+            return 'это не король'
+        elif self.is_leap and abs(sx - ex) == 1:
             return 'вы не можете передригаться на 1 клетку после препрыгивания'
+        else:
+            cx, cy = sx, sy
+            enx, eny = None, None
+            ec = 0
+            while cx != ex:
+                cx += dx
+                cy += dy
+                if self[cx, cy] in self.tot[self.nem[self.p]]:
+                    ec += 1
+                    enx, eny = cx, cy
+                    self.is_leap = False
+                if ec == 2:
+                    return 'можно перепрыгивать только через 1 врага'
+                print(cx, cy, ex, ey, ec, self[cy, cx])
+            print(ec, self.is_leap)
+            if not ec and self.is_leap:
+                return 'надо съесть другого юнита'
+            if enx == cx:
+                return 'нельзя прыгать на врагов'
+            self[sx, sy] = self.f
+            if enx is not None:
+                self[enx, eny] = self.f
+            self[ex, ey] = st
+        if enx:
+            if any(list(map(lambda с: self.has_enemy(cx, cy, *с), [(1, 1), (1, -1), (-1, 1), (-1, -1)]))):
+                self.is_leap = True
+            return 'взятие шашки прошло успешно'
+        return 'движение выполнено'
 
 
     # def move(self, channel):

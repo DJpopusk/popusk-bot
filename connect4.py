@@ -117,10 +117,19 @@ Popusk 2 : {self.player2}
 
 Popusk 1 : {self.player1}
 Popusk 2 : {self.player2}
+! DRAW !
+{self.board_view()}""" if t == 'draw' else f"""Connect4 by Popusk-bot
+
+Popusk 1 : {self.player1}
+Popusk 2 : {self.player2}
 {self.players[t]} ! WON !
 {self.board_view()}"""
 
     def move(self, column, t):
         super().move(column, t)
         if self.win(t):
-            self.on_win(t)
+            return self.on_win(t)
+        elif self.view['_'] not in self.board_view():
+            return self.on_win('draw')
+        else:
+            return self.board_view()

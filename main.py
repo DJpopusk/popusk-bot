@@ -73,7 +73,9 @@ class YLBotClient(discord.Client):
                     if EMOTES[reaction.emoji] == "F":
                         self.game.switch_turn()
                         self.game.force_win(self.game.turn)
+
                         await self.game_message.edit(content=self.game.on_win(self.game.turn))
+                        self.game = Game()
                     else:
                         self.game.move(EMOTES[reaction.emoji], self.game.turn)
                         await self.game_message.edit(content=self.game.draw())

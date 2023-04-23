@@ -78,7 +78,15 @@ class YLBotClient(discord.Client):
                         self.game = Game()
                     else:
                         self.game.move(EMOTES[reaction.emoji], self.game.turn)
-                        await self.game_message.edit(content=self.game.draw())
+                        if self.game.win('t1') or self.game.win('t2'):
+                            if self.game.win('t1'):
+
+                                await self.game_message.edit(content=self.game.on_win('t1'))
+                            else:
+                                await self.game_message.edit(content=self.game.on_win('t2'))
+                            self.game = Game()
+                        else:
+                            await self.game_message.edit(content=self.game.draw())
 
 
 intents = discord.Intents.all()

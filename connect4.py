@@ -25,10 +25,6 @@ def contains(small, big):
     return False
 
 
-def q(x):
-    return x * 4
-
-
 class Board:
     def __init__(self, rows=6, columns=6, filler=":blue_square:", team1=":orange_circle:", team2=":green_circle:"):
         self.table = [["_" for i in range(columns)] for _ in range(rows)]
@@ -38,7 +34,9 @@ class Board:
         self.turn = "t1"
 
     def board_view(self):
-        print([[t for row in self.table for t in row]])
+        # print(*[[row for row in self.table for t in row]])
+        for i in self.table:
+            print(i)
         res = ["".join([self.view[t] for t in row]) for row in self.table]
         return "\n".join(res)
 
@@ -49,11 +47,11 @@ class Board:
         t = self.view[t]
         for _ in range(len(self.table)):
             a1 = self.table[_].count(t)
-            if a1 >= 4 and self.table[_][self.table[_].index(t):self.table[_].index(t) + 4] == q([t]):
+            if a1 >= 4 and self.table[_][self.table[_].index(t):self.table[_].index(t) + 4] == [t, t, t, t]:
                 return True
             elif a1 >= 4:
                 b = self.table[_].index(t) + self.table[_][b + 1:].index(t)
-                if self.table[_][b: min(b + 4, len(self.table[_]))] == q([t]):
+                if self.table[_][b: min(b + 4, len(self.table[_]))] == [t, t, t, t]:
                     return True
         return False
 
@@ -62,14 +60,14 @@ class Board:
         mas = rotate_matrix(self.table)
         for _ in range(len(mas)):
             a1 = mas[_].count(t)
-            if a1 >= 4 and mas[_][mas[_].index(t):mas[_].index(t) + 4] == q([t]):
+            if a1 >= 4 and mas[_][mas[_].index(t):mas[_].index(t) + 4] == [t, t, t, t]:
                 return True
             elif a1 >= 4:
                 b = mas[_].index(t)
                 c = mas[_][b + 1:].index(t)
                 b = b + c
 
-                if mas[_][b: min(b + 4, len(mas[_]))] == q([t]):
+                if mas[_][b: min(b + 4, len(mas[_]))] == [t, t, t, t]:
                     return True
         return False
 
@@ -78,7 +76,7 @@ class Board:
         digs = get_matrix_diagonal(self.table)
         digs = [i for i in digs if i.count(t) >= 4]
         for i in digs:
-            if q([t]) in i:
+            if [t, t, t, t] in i:
                 return True
 
         return False
@@ -86,7 +84,7 @@ class Board:
     def win_row(self, t='t1'):
         a = self.view[t]
         for i in self.table:
-            if contains(q([a]), i):
+            if contains([t, t, t, t], i):
                 return True
         return False
 
@@ -94,7 +92,7 @@ class Board:
         mas = rotate_matrix(self.table)
         a = self.view[t]
         for i in mas:
-            if contains(q([a]), i):
+            if contains([t, t, t, t], i):
                 return True
         return False
 
@@ -103,10 +101,10 @@ class Board:
         mas = get_matrix_diagonal(self.table)
         mas = [i for i in mas if len(i) >= 4]
         for i in mas:
-            if i == q([a]):
+            if i == [t, t, t, t]:
                 return True
             else:
-                if contains(i, q([a])):
+                if contains(i, [t, t, t, t]):
                     return True
         return False
 
@@ -207,3 +205,8 @@ the field is full
         if p2:
             self.player2 = p2
         self.players = {"t1": self.player1, "t2": self.player2}
+
+
+a = Game()
+
+a.table = [["_" for i in range(a.columns)] for _ in range(a.rows)]
